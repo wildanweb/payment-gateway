@@ -1,0 +1,23 @@
+{
+  "name": "midtrans-payment-server",
+  "version": "1.0.0",
+  "description": "Server for handling Midtrans payments and file downloads",
+  "main": "server..js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "latest",
+    "express": "^4.18.2",
+    "fs": "0.0.1-security",
+    "midtrans-client": "^1.3.0",
+    "dotenv": "16.4.5",
+    "body-parser": "1.20.3",
+    "path": "^0.12.7"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "author": "https://github.com/wildanweb",
+  "license": "MIT"
+}
