@@ -5,7 +5,7 @@
 
 ## Tabel konten
 - [Ringkasan](#-ringkasan-)
-- [Cara Menjalankan](#cara-menjalankan)
+- [Cara Menjalankan](#-cara-menjalankan-)
 
 ---
 
