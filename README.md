@@ -5,8 +5,7 @@
 
 ## Tabel konten
 - [Ringkasan](#-ringkasan-)
-- [Cara Menjalankan](#-cara-menjalankan-)
-
+- [Menjalankan](#-menjalankan-)
 ---
 
 # 🌟 Ringkasan 🌟
@@ -30,7 +29,7 @@ Dukung saya dengan menakan bintang 🐳
 </table>
 ---
 
-# 🤖 Cara Menjalankan
+# 🤖 Menjalankan
 Kami menyambut kontribusi ke Situs Web Dies Irae Payment Gateway! Untuk memulai, silakan ikuti langkah-langkah sederhana ini
 steps:
 
