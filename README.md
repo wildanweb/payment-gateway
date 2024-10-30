@@ -3,7 +3,7 @@
 
  ![Ice Cream Website Screenshot](https://files.catbox.moe/f17suf.png)
 
-## Table of Contents
+## Tabel konten
 - [Ringkasan](#-ringkasan-)
 - [Cara Menjalankan](#cara-menjalankan)
 
