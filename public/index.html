@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Page</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <button id="changePageButton" style="position: absolute; top: 10px; right: 10px; padding: 5px; background-color: #764ba2; color: #667eea; border: 2px solid #764ba2; border-radius: 50%; cursor: pointer; font-size: 20px; line-height: 1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: background-color 0.3s;">⚠️</button>
+    <h1>Premium Script</h1>
+    <form id="paymentForm">
+      <label for="file">Pilih Script: </label>
+      <select id="file" name="file">
+        <option value="" disabled selected>Tekan Untuk Memilih Script</option>
+        <option value="DiesPremV1|1">Dies Irae v1</option>
+      </select>
+
+      <p id="priceDisplay" style="display: none;">Price: <span id="price">Rp0</span></p>
+
+      <button type="submit" id="buyButton" style="display: none;">Beli Sekarang</button>
+      
+      <!-- Peringatan setelah tombol beli muncul -->
+      <p id="warningMessage" style="display: none; color: red;">Jika Anda sudah melakukan pembayaran namun tidak dialihkan ke halaman berikutnya, silakan laporkan masalah ini melalui tombol "⚠️". Harap sertakan bukti transfer yang jelas sebagai bukti transaksi.</p>
+    </form>
+  </div>
+
+  <!-- Notifikasi Cookie -->
+  <div id="cookieConsent" class="cookie-consent">
+    <div class="cookie-content">
+      <p>Website ini membutuhkan cookie untuk tidak ke restart saat transaksi.</p>
+      <button id="acceptCookies">Accept Cookies</button>
+    </div>
+  </div>
+
+  <script>
+    // Fungsi untuk mengatur cookie
+    function setCookie(name, value, days) {
+      let expires = "";
+      if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+      }
+      document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+
+    // Fungsi untuk mengambil cookie
+    function getCookie(name) {
+      const nameEQ = name + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+      }
+      return null;
+    }
+
+    // Notifikasi Cookie
+    const cookieConsent = document.getElementById('cookieConsent');
+    const acceptCookiesBtn = document.getElementById('acceptCookies');
+
+    // Periksa apakah cookie untuk persetujuan sudah ada
+    if (!getCookie('cookieConsent')) {
+      cookieConsent.style.display = 'flex'; // Tampilkan notifikasi jika belum ada persetujuan
+    }
+
+    // Event untuk menyetujui cookie
+    acceptCookiesBtn.addEventListener('click', function() {
+      setCookie('cookieConsent', 'true', 365); // Simpan persetujuan selama 1 tahun
+      cookieConsent.style.display = 'none'; // Sembunyikan notifikasi
+    });
+
+    const fileSelect = document.getElementById('file');
+    const priceDisplay = document.getElementById('priceDisplay');
+    const priceSpan = document.getElementById('price');
+    const buyButton = document.getElementById('buyButton');
+    const warningMessage = document.getElementById('warningMessage');
+
+    // Cek jika ada data cookie dan set kembali saat page refresh
+    window.onload = function() {
+      const savedFileOption = getCookie('selectedFile');
+      const savedPrice = getCookie('selectedPrice');
+
+      if (savedFileOption && savedPrice) {
+        fileSelect.value = savedFileOption;
+        priceSpan.textContent = `Rp${Number(savedPrice).toLocaleString()}`;
+        priceDisplay.style.display = 'block';
+        buyButton.style.display = 'block';
+        warningMessage.style.display = 'block'; // Tampilkan peringatan jika tombol beli sudah muncul
+      }
+    };
+
+    fileSelect.addEventListener('change', function() {
+      const fileOption = this.value;
+      if (fileOption) {
+        const [fileName, price] = fileOption.split('|');
+        priceSpan.textContent = `Rp${Number(price).toLocaleString()}`;
+        priceDisplay.style.display = 'block';
+        buyButton.style.display = 'block';
+
+        // Tampilkan pesan peringatan
+        warningMessage.style.display = 'block';
+
+        // Simpan file dan harga di cookie
+        setCookie('selectedFile', fileOption, 1);
+        setCookie('selectedPrice', price, 1);
+      } else {
+        priceDisplay.style.display = 'none';
+        buyButton.style.display = 'none';
+
+        // Sembunyikan pesan peringatan
+        warningMessage.style.display = 'none';
+      }
+    });
+
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const fileOption = fileSelect.value;
+      const [fileName, price] = fileOption.split('|');
+
+      fetch('/create-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName, price })
+      })
+      .then(response => response.json())
+      .then(data => {
+        snap.pay(data.token, {
+          onSuccess: function(result) {
+            window.location.href = `/success-page?file=${encodeURIComponent(fileName)}&order_id=${result.order_id}`;
+          }
+        });
+      });
+    });
+
+    // Ambil client key dari server saat halaman dimuat
+    fetch('/get-client-key')
+      .then(response => response.json())
+      .then(data => {
+        // Buat script baru untuk memuat Midtrans Snap JS dengan client key
+        const script = document.createElement('script');
+        script.src = `https://app.midtrans.com/snap/snap.js`;
+        script.setAttribute('data-client-key', data.clientKey);
+        document.head.appendChild(script);
+      })
+      .catch(error => {
+        console.error('Error loading Midtrans client key:', error);
+      });
+
+    document.getElementById('changePageButton').addEventListener('click', function() {
+      window.location.href = 'https://cs.dies-irae.my.id/'; // Ganti dengan URL halaman tujuan
+    });
+  </script>
+</body>
+</html>
